@@ -14,7 +14,7 @@
   --bg:#0e0a14; --surface:#18111f; --surface2:#21182b; --line:#33253f;
   --fg:#f5eefc; --mute:#a597b8;
   --c-arena:#ff3d8b; --c-classic:#57e1ff; --c-live:#ffd426; --c-bar:#ff7a1f;
-  --accent:#ff3d8b; --on-accent:#1a0912; --glyph:#14091a;
+  --accent:#ff3d8b; --on-accent:#1a0912; --glyph:#14091a; --t1:#ff2433; --t2:#ffffff; --t3:#4a66ff; --tshadow:rgba(0,0,0,.55);
   --display:'Anton','Impact','Arial Narrow',sans-serif;
   --body:'Archivo','Helvetica Neue',Arial,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif;
   --mono:'JetBrains Mono','SFMono-Regular',Menlo,Consolas,monospace;
@@ -25,14 +25,14 @@
     --bg:#f3f0f8; --surface:#ffffff; --surface2:#ebe6f3; --line:#d4cbe0;
     --fg:#17101f; --mute:#625574;
     --c-arena:#d4146a; --c-classic:#0a86a6; --c-live:#c28f00; --c-bar:#d9520a;
-    --accent:#d4146a; --on-accent:#ffffff; --glyph:#ffffff; color-scheme:light;
+    --accent:#d4146a; --on-accent:#ffffff; --glyph:#ffffff; --t1:#e3000f; --t2:#6d0f66; --t3:#000095; --tshadow:rgba(0,0,0,.16); color-scheme:light;
   }
 }
 :root[data-theme="light"]{
   --bg:#f3f0f8; --surface:#ffffff; --surface2:#ebe6f3; --line:#d4cbe0;
   --fg:#17101f; --mute:#625574;
   --c-arena:#d4146a; --c-classic:#0a86a6; --c-live:#c28f00; --c-bar:#d9520a;
-  --accent:#d4146a; --on-accent:#ffffff; --glyph:#ffffff; color-scheme:light;
+  --accent:#d4146a; --on-accent:#ffffff; --glyph:#ffffff; --t1:#e3000f; --t2:#6d0f66; --t3:#000095; --tshadow:rgba(0,0,0,.16); color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -44,7 +44,7 @@ button:focus-visible,a:focus-visible,.pinicon:focus-visible{outline:2px solid va
 
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .eyebrow{font:600 12px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
-h1{font:400 clamp(40px,8.6vw,104px)/.92 var(--display);text-transform:none;letter-spacing:.01em;margin:12px 0 16px;text-shadow:.05em .05em 0 var(--accent);text-wrap:balance}
+h1{display:inline-block;font:400 clamp(40px,8.6vw,104px)/.92 var(--display);text-transform:none;letter-spacing:.01em;margin:12px 0 16px;padding-bottom:.06em;background:linear-gradient(95deg,var(--t1) 0%,var(--t2) 34%,var(--t3) 66%,var(--t3) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(.04em .04em 0 var(--tshadow));text-wrap:balance}
 .lede{max-width:62ch;color:var(--mute);margin:0 0 26px;font-size:16px}
 .theme{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:7px 12px;cursor:pointer;font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
 
@@ -131,7 +131,7 @@ dd{margin:0;min-width:0;overflow-wrap:anywhere}
     </div>
     <button type="button" class="theme" id="theme" aria-label="Changer de thème">Thème</button>
   </div>
-  <p class="lede">Une vraie carte, 63 lieux dans cinq villes, de la grande arène à la cave à guitares. Filtrez par ville ou par style, zoomez dans les quartiers denses, puis ouvrez la fiche : photo, horaires, itinéraire. Ajoutez vos propres photos directement sur la fiche.</p>
+  <p class="lede">Une vraie carte, 64 lieux dans cinq villes, de la grande arène à la cave à guitares. Filtrez par ville ou par style, zoomez dans les quartiers denses, puis ouvrez la fiche : photo, horaires, itinéraire. Ajoutez vos propres photos directement sur la fiche.</p>
 
   <div class="bar">
     <div class="seg" role="group" aria-label="Ville" id="city">
@@ -174,6 +174,7 @@ dd{margin:0;min-width:0;overflow-wrap:anywhere}
 (function(){
 var V=[
   {id:'taipei-arena',n:'Taipei Arena',c:'arena',city:'tp',z:'Songshan',lat:25.0506849,lon:121.5501199,pid:'ChIJcVe4HuirQjQRWHrzxtVRImg',r:4.5,k:28840,h:'Tous les jours 9h–22h',p:'',d:"Grande arène couverte pour les tournées et les têtes d'affiche. La station de métro Taipei Arena (ligne verte) est à côté.",t:["Billets à l'avance","Accessible PMR"]},
+  {"id": "taipei-dome", "n": "Taipei Dome", "c": "arena", "city": "tp", "z": "Xinyi", "lat": 25.0424367, "lon": 121.5595066, "pid": "ChIJm6BTWcerQjQR-JQqd521Sv8", "r": 4.6, "k": 8741, "h": "Ouvert 24h/24 (le site, pas les événements)", "p": "", "d": "Grand stade couvert multifonction, dédié au baseball et aux très grands concerts, expositions et événements. Un des repères récents du quartier Xinyi.", "t": ["Baseball et méga-concerts", "Billets à l'avance"]},
   {id:'taipei-music-center',n:'Taipei Music Center',c:'arena',city:'tp',z:'Nangang',lat:25.0526926,lon:121.599042,pid:'ChIJGz-kcGWrQjQR8LeDgwnd8H0',r:4.5,k:9541,h:'Mar–dim 10h–18h',p:'',d:"Pôle de la pop taïwanaise avec salle de concert, espace en plein air et industrie musicale. Le musée Cultural Cube voisin est fermé du 20 octobre au 4 décembre 2026.",t:["Billets à l'avance","Parking payant","Accessible PMR"]},
   {id:'legacy-tera',n:'Legacy TERA',c:'arena',city:'tp',z:'Nangang',lat:25.0515038,lon:121.5980741,pid:'ChIJR86TfACrQjQRglWfnQGPXW8',r:4.6,k:628,h:'Tous les jours 13h–23h',p:'',d:"Salle moderne du complexe de Nangang, réputée pour son système son. Arrivez tôt les soirs de forte affluence.",t:["Carte et mobile acceptés","Accessible PMR"]},
   {id:'zepp-new-taipei',n:'Zepp New Taipei',c:'arena',city:'nt',z:'Xinzhuang',lat:25.0596783,lon:121.4495726,pid:'ChIJW0VjthSpQjQRj0GokDjqbO4',r:4.7,k:2763,h:'',p:'',d:"La grande salle moderne de New Taipei, dans un centre commercial. Acoustique et éclairages très bien notés. Comptez vingt minutes d'avance.",t:["Parking payant","Accessible PMR"]},
@@ -246,7 +247,7 @@ var V=[
   var ORDER=['arena','live','bar','classic'];
   /* Recherche Wikipédia pour la photo par défaut. Le site est affiché quand le lieu n'a pas sa propre page. */
   var WK={
-    'taipei-arena':'Taipei Arena','taipei-music-center':'Taipei Music Center','legacy-tera':'Taipei Music Center','live-house-d':'Taipei Music Center',
+    'taipei-arena':'Taipei Arena','taipei-dome':'Taipei Dome','taipei-music-center':'Taipei Music Center','legacy-tera':'Taipei Music Center','live-house-d':'Taipei Music Center',
     'zepp-new-taipei':'Zepp New Taipei','legacy-taipei':'Huashan 1914 Creative Park','red-house':'Red House Theater Taipei','national-concert-hall':'National Concert Hall Taipei',
     'tpac':'Taipei Performing Arts Center','tmi':'Taiwan Music Institute','eslite-hall':'Eslite Spectrum Xinyi','national-tc':'National Taichung Theater','weiwuying':'National Kaohsiung Center for the Arts','kmc':'Kaohsiung Music Center','hi-ing':'Kaohsiung Music Center','kh-music-hall':'Kaohsiung City Music Hall','tn-cultural-center':'Tainan Cultural Center'
   };
