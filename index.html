@@ -384,11 +384,21 @@ var V=[
       wikiCache[id]=res;return res;
     }).catch(function(){wikiCache[id]=null;return null;});
   }
+  var EXT=['jpg','jpeg','png','webp','JPG','JPEG','PNG','WEBP'];
+  function findFile(id){
+    var i=0;
+    function next(){
+      if(i>=EXT.length)return Promise.resolve(null);
+      var src='photos/'+id+'.'+EXT[i++];
+      return probe(src).then(function(ok){return ok?src:next();});
+    }
+    return next();
+  }
   function resolvePhoto(v){
     return dbGet(v.id).then(function(b){
       if(b){if(urls[v.id])URL.revokeObjectURL(urls[v.id]);urls[v.id]=URL.createObjectURL(b);return {src:urls[v.id],own:true};}
-      return probe('photos/'+v.id+'.jpg').then(function(ok){
-        if(ok)return {src:'photos/'+v.id+'.jpg',own:true,file:true};
+      return findFile(v.id).then(function(src){
+        if(src)return {src:src,own:true,file:true};
         return wiki(v.id).then(function(w){return w?{src:w.src,wiki:w}:null;});
       });
     });
@@ -445,10 +455,14 @@ var V=[
       resolvePhoto(v).then(function(p){
         if(state.sel!==v.id)return;
         var box=document.getElementById('photo');if(!box)return;
+        var h0=detailEl.querySelector('.hint');
+        if(!p||!p.file){if(h0)h0.innerHTML='Aucun fichier trouvé. Ajoutez-le sous le nom <code>photos/'+esc(v.id)+'.jpg</code> à côté de index.html.';}
         if(!p){rm.hidden=true;return;}
         var c=p.wiki?'<div class="credit">Photo du site · <a href="'+esc(p.wiki.page)+'" target="_blank" rel="noopener">Wikipédia : '+esc(p.wiki.title)+'</a></div>':'<div class="credit">Ma photo</div>';
         box.innerHTML='<img alt="'+esc(v.n)+'" src="'+esc(p.src)+'">'+c;
         rm.hidden=!(p.own&&!p.file);
+        var h=detailEl.querySelector('.hint');
+        if(h&&p.file)h.innerHTML='Photo chargée depuis <code>'+esc(p.src)+'</code>.';
       });
     }
     function add(f){
