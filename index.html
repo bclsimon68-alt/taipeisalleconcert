@@ -66,6 +66,7 @@ svg.ico *{fill:var(--c)}
 
 #map{height:min(78vh,820px);min-height:380px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);z-index:0}
 .leaflet-container{font-family:var(--body)}
+.darkmap .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(.9) saturate(.55)}
 .pinicon{background:none;border:0}
 .pinicon svg{display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,.55));transition:transform .12s}
 .pinicon svg *{fill:var(--c);stroke:#0e0a14;stroke-width:2}
@@ -150,7 +151,7 @@ dd{margin:0;min-width:0;overflow-wrap:anywhere}
     </div>
   </div>
 
-  <p class="foot">Fond de carte © contributeurs OpenStreetMap, style © CARTO. Photos par défaut : Wikipédia et Wikimedia Commons, sous licence libre, avec lien vers la source ; elles ne couvrent que quelques grands lieux. Vos propres photos restent dans votre navigateur. Pour les rendre permanentes et partageables, placez des fichiers <code>photos/identifiant.jpg</code> à côté de cette page. Horaires relevés sur Google Maps le 22 octobre 2026 : ce sont ceux des établissements, pas des concerts.</p>
+  <p class="foot">Fond de carte © contributeurs OpenStreetMap, . Photos par défaut : Wikipédia et Wikimedia Commons, sous licence libre, avec lien vers la source ; elles ne couvrent que quelques grands lieux. Vos propres photos restent dans votre navigateur. Pour les rendre permanentes et partageables, placez des fichiers <code>photos/identifiant.jpg</code> à côté de cette page. Horaires relevés sur Google Maps le 22 octobre 2026 : ce sont ceux des établissements, pas des concerts.</p>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -235,10 +236,10 @@ var V=[
   var tile=null,prov=0,okTiles=0,badTiles=0;
   /* Fonds de carte testés dans l'ordre : si un serveur refuse les tuiles, on passe au suivant. */
   var PROVIDERS=[
-    function(l){return L.tileLayer('https://{s}.basemaps.cartocdn.com/'+(l?'light_all':'dark_all')+'/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:TILE_ATTR,referrerPolicy:'origin'});},
-    function(l){return L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',{subdomains:'abc',maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> France',referrerPolicy:'origin'});},
-    function(l){return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',referrerPolicy:'origin'});}
+    function(l){return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',referrerPolicy:'origin'});},
+    function(l){return L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',{subdomains:'abc',maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> France',referrerPolicy:'origin'});}
   ];
+
   function setTiles(){
     if(tile)map.removeLayer(tile);
     okTiles=0;badTiles=0;
@@ -249,6 +250,7 @@ var V=[
       if(okTiles===0&&badTiles>=3&&prov<PROVIDERS.length-1){prov++;setTiles();}
     });
     tile.addTo(map);
+    document.getElementById('map').classList.toggle('darkmap',!isLight());
     themeBtn.textContent=isLight()?'Mode sombre':'Mode clair';
   }
   themeBtn.addEventListener('click',function(){
