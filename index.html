@@ -385,11 +385,13 @@ var V=[
     }).catch(function(){wikiCache[id]=null;return null;});
   }
   var EXT=['jpg','jpeg','png','webp','JPG','JPEG','PNG','WEBP'];
+  var DIRS=['photos/','Photos/','PHOTOS/'];
   function findFile(id){
-    var i=0;
+    var i=0,tries=[];
+    DIRS.forEach(function(d){EXT.forEach(function(e){tries.push(d+id+'.'+e);});});
     function next(){
-      if(i>=EXT.length)return Promise.resolve(null);
-      var src='photos/'+id+'.'+EXT[i++];
+      if(i>=tries.length)return Promise.resolve(null);
+      var src=tries[i++];
       return probe(src).then(function(ok){return ok?src:next();});
     }
     return next();
