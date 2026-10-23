@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Taipei Sous Tension</title>
+<title>R.O.C.(K) Made In Taiwan</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
@@ -13,7 +14,7 @@
   --bg:#0e0a14; --surface:#18111f; --surface2:#21182b; --line:#33253f;
   --fg:#f5eefc; --mute:#a597b8;
   --c-arena:#ff3d8b; --c-classic:#57e1ff; --c-live:#ffd426; --c-bar:#ff7a1f;
-  --accent:#ff3d8b; --on-accent:#1a0912;
+  --accent:#ff3d8b; --on-accent:#1a0912; --glyph:#14091a;
   --display:'Anton','Impact','Arial Narrow',sans-serif;
   --body:'Archivo','Helvetica Neue',Arial,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif;
   --mono:'JetBrains Mono','SFMono-Regular',Menlo,Consolas,monospace;
@@ -24,14 +25,14 @@
     --bg:#f3f0f8; --surface:#ffffff; --surface2:#ebe6f3; --line:#d4cbe0;
     --fg:#17101f; --mute:#625574;
     --c-arena:#d4146a; --c-classic:#0a86a6; --c-live:#c28f00; --c-bar:#d9520a;
-    --accent:#d4146a; --on-accent:#ffffff; color-scheme:light;
+    --accent:#d4146a; --on-accent:#ffffff; --glyph:#ffffff; color-scheme:light;
   }
 }
 :root[data-theme="light"]{
   --bg:#f3f0f8; --surface:#ffffff; --surface2:#ebe6f3; --line:#d4cbe0;
   --fg:#17101f; --mute:#625574;
   --c-arena:#d4146a; --c-classic:#0a86a6; --c-live:#c28f00; --c-bar:#d9520a;
-  --accent:#d4146a; --on-accent:#ffffff; color-scheme:light;
+  --accent:#d4146a; --on-accent:#ffffff; --glyph:#ffffff; color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -43,7 +44,7 @@ button:focus-visible,a:focus-visible,.pinicon:focus-visible{outline:2px solid va
 
 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .eyebrow{font:600 12px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
-h1{font:400 clamp(46px,10.5vw,116px)/.92 var(--display);text-transform:uppercase;letter-spacing:.01em;margin:12px 0 16px;text-shadow:.05em .05em 0 var(--accent);text-wrap:balance}
+h1{font:400 clamp(40px,8.6vw,104px)/.92 var(--display);text-transform:none;letter-spacing:.01em;margin:12px 0 16px;text-shadow:.05em .05em 0 var(--accent);text-wrap:balance}
 .lede{max-width:62ch;color:var(--mute);margin:0 0 26px;font-size:16px}
 .theme{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:7px 12px;cursor:pointer;font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
 
@@ -57,8 +58,11 @@ h1{font:400 clamp(46px,10.5vw,116px)/.92 var(--display);text-transform:uppercase
 .chip .n{font:600 11px var(--mono);color:var(--mute)}
 .chip[aria-pressed="true"]{border-color:var(--c)}
 .chip[aria-pressed="false"]{opacity:.5}
-svg.ico{display:block;flex:none}
-svg.ico *{fill:var(--c)}
+.ico{display:block;flex:none;overflow:visible}
+.ico .bg{fill:var(--c);stroke:var(--bg);stroke-width:1}
+.ico .gl{fill:var(--glyph);stroke:none}
+.ico .gs{fill:none;stroke:var(--glyph);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.ico .hole{fill:var(--c)}
 
 .main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);gap:20px;align-items:start}
 @media (max-width:920px){.main{grid-template-columns:minmax(0,1fr)}}
@@ -69,10 +73,9 @@ svg.ico *{fill:var(--c)}
 .darkmap .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(.9) saturate(.55)}
 .pinicon{background:none;border:0}
 .pinicon svg{display:block;filter:drop-shadow(0 1px 3px rgba(0,0,0,.55));transition:transform .12s}
-.pinicon svg *{fill:var(--c);stroke:#0e0a14;stroke-width:2}
 .pinicon:hover svg{transform:scale(1.2)}
-.pinicon.sel svg{transform:scale(1.45)}
-.pinicon.sel svg *{stroke:#fff;stroke-width:2.5}
+.pinicon.sel svg{transform:scale(1.3)}
+.pinicon.sel svg .bg{stroke:var(--fg);stroke-width:2}
 .leaflet-tooltip{background:var(--surface);color:var(--fg);border:1px solid var(--line);font:600 12px var(--body);box-shadow:none}
 .leaflet-tooltip-top:before{border-top-color:var(--line)}
 .leaflet-control-attribution{font-size:10px}
@@ -106,7 +109,7 @@ dd{margin:0;min-width:0;overflow-wrap:anywhere}
 .listhead{display:flex;justify-content:space-between;align-items:baseline;padding:0 2px 8px;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
 .list{max-height:460px;overflow-y:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
 .gh{position:sticky;top:0;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-bottom:1px solid var(--line);font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;z-index:1}
-.row{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 12px;cursor:pointer}
+.row{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:9px 12px;cursor:pointer}
 .row:hover{background:var(--surface2)}
 .row[aria-current="true"]{background:var(--surface2);box-shadow:inset 0 0 0 1px var(--c)}
 .row .nm{font-weight:600;overflow-wrap:anywhere}
@@ -121,18 +124,26 @@ dd{margin:0;min-width:0;overflow-wrap:anywhere}
 <div class="wrap">
   <div class="top">
     <div>
-      <div class="eyebrow">Taipei · Nouveau Taipei · scènes live</div>
-      <h1>Taipei Sous Tension</h1>
+      <div class="eyebrow">Taipei · New Taipei · Kaohsiung · Taichung · Tainan</div>
+      <h1>R.O.C.(K) Made In Taiwan</h1>
     </div>
     <button type="button" class="theme" id="theme" aria-label="Changer de thème">Thème</button>
   </div>
-  <p class="lede">Une vraie carte, 37 lieux de la grande arène à la cave à guitares. Filtrez par ville ou par style, zoomez dans les quartiers denses, puis ouvrez la fiche : photo, horaires, itinéraire. Ajoutez vos propres photos directement sur la fiche.</p>
+  <p class="lede">Une vraie carte, 63 lieux dans cinq villes, de la grande arène à la cave à guitares. Filtrez par ville ou par style, zoomez dans les quartiers denses, puis ouvrez la fiche : photo, horaires, itinéraire. Ajoutez vos propres photos directement sur la fiche.</p>
 
   <div class="bar">
     <div class="seg" role="group" aria-label="Ville" id="city">
       <button type="button" data-city="all" aria-pressed="true">Tout</button>
       <button type="button" data-city="tp" aria-pressed="false">Taipei</button>
-      <button type="button" data-city="nt" aria-pressed="false">Nouveau Taipei</button>
+      <button type="button" data-city="nt" aria-pressed="false">New Taipei</button>
+      <button type="button" data-city="kh" aria-pressed="false">Kaohsiung</button>
+      <button type="button" data-city="tc" aria-pressed="false">Taichung</button>
+      <button type="button" data-city="tn" aria-pressed="false">Tainan</button>
+    </div>
+    <div class="seg" role="group" aria-label="Langue des noms sur la carte" id="lang">
+      <button type="button" data-lang="fr" aria-pressed="true">Noms en français</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
     </div>
     <div class="chips" id="chips" role="group" aria-label="Type de lieu"></div>
   </div>
@@ -151,17 +162,19 @@ dd{margin:0;min-width:0;overflow-wrap:anywhere}
     </div>
   </div>
 
-  <p class="foot">Fond de carte © contributeurs OpenStreetMap, . Photos par défaut : Wikipédia et Wikimedia Commons, sous licence libre, avec lien vers la source ; elles ne couvrent que quelques grands lieux. Vos propres photos restent dans votre navigateur. Pour les rendre permanentes et partageables, placez des fichiers <code>photos/identifiant.jpg</code> à côté de cette page. Horaires relevés sur Google Maps le 22 octobre 2026 : ce sont ceux des établissements, pas des concerts.</p>
+  <p class="foot">Fond de carte © OpenFreeMap, © OpenMapTiles, données © contributeurs OpenStreetMap. Les noms de rues en français ou en anglais n'existent que lorsqu'ils sont renseignés dans OpenStreetMap ; sinon la carte affiche le nom chinois. Photos par défaut : Wikipédia et Wikimedia Commons, sous licence libre, avec lien vers la source ; elles ne couvrent que quelques grands lieux. Vos propres photos restent dans votre navigateur. Pour les rendre permanentes et partageables, placez des fichiers <code>photos/identifiant.jpg</code> à côté de cette page. Horaires relevés sur Google Maps en octobre 2026 : ce sont ceux des établissements, pas des concerts.</p>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
 <script>
 (function(){
 var V=[
   {id:'taipei-arena',n:'Taipei Arena',c:'arena',city:'tp',z:'Songshan',lat:25.0506849,lon:121.5501199,pid:'ChIJcVe4HuirQjQRWHrzxtVRImg',r:4.5,k:28840,h:'Tous les jours 9h–22h',p:'',d:"Grande arène couverte pour les tournées et les têtes d'affiche. La station de métro Taipei Arena (ligne verte) est à côté.",t:["Billets à l'avance","Accessible PMR"]},
   {id:'taipei-music-center',n:'Taipei Music Center',c:'arena',city:'tp',z:'Nangang',lat:25.0526926,lon:121.599042,pid:'ChIJGz-kcGWrQjQR8LeDgwnd8H0',r:4.5,k:9541,h:'Mar–dim 10h–18h',p:'',d:"Pôle de la pop taïwanaise avec salle de concert, espace en plein air et industrie musicale. Le musée Cultural Cube voisin est fermé du 20 octobre au 4 décembre 2026.",t:["Billets à l'avance","Parking payant","Accessible PMR"]},
   {id:'legacy-tera',n:'Legacy TERA',c:'arena',city:'tp',z:'Nangang',lat:25.0515038,lon:121.5980741,pid:'ChIJR86TfACrQjQRglWfnQGPXW8',r:4.6,k:628,h:'Tous les jours 13h–23h',p:'',d:"Salle moderne du complexe de Nangang, réputée pour son système son. Arrivez tôt les soirs de forte affluence.",t:["Carte et mobile acceptés","Accessible PMR"]},
-  {id:'zepp-new-taipei',n:'Zepp New Taipei',c:'arena',city:'nt',z:'Xinzhuang',lat:25.0596783,lon:121.4495726,pid:'ChIJW0VjthSpQjQRj0GokDjqbO4',r:4.7,k:2763,h:'',p:'',d:"La grande salle moderne de Nouveau Taipei, dans un centre commercial. Acoustique et éclairages très bien notés. Comptez vingt minutes d'avance.",t:["Parking payant","Accessible PMR"]},
+  {id:'zepp-new-taipei',n:'Zepp New Taipei',c:'arena',city:'nt',z:'Xinzhuang',lat:25.0596783,lon:121.4495726,pid:'ChIJW0VjthSpQjQRj0GokDjqbO4',r:4.7,k:2763,h:'',p:'',d:"La grande salle moderne de New Taipei, dans un centre commercial. Acoustique et éclairages très bien notés. Comptez vingt minutes d'avance.",t:["Parking payant","Accessible PMR"]},
 
   {id:'legacy-taipei',n:'Legacy Taipei',c:'live',city:'tp',z:'Zhongzheng · Huashan 1914',lat:25.0450497,lon:121.5294647,pid:'ChIJ_QYiGnupQjQRf4pPuC7qhJc',r:4.5,k:2355,h:'',p:'',d:"Live house historique installé dans le parc culturel Huashan 1914. Les horaires dépendent de la programmation.",t:["Accessible PMR"]},
   {id:'the-wall',n:'THE WALL MUSIC',c:'live',city:'tp',z:'Wenshan · Gongguan',lat:25.0107833,lon:121.5367751,pid:'ChIJCZ9fWPWpQjQRYIvjUBUhcow',r:4.3,k:1387,h:'Ven–dim 16h–23h',p:'',d:"Sous-sol underground à deux salles : rock, indie, expérimental et soirées DJ. Prévoyez une pièce d'identité à l'entrée.",t:["Fermé lun–jeu"]},
@@ -198,7 +211,33 @@ var V=[
   {id:'national-concert-hall',n:'National Concert Hall',c:'classic',city:'tp',z:'Zhongzheng',lat:25.0370489,lon:121.519236,pid:'ChIJcwObHJ6pQjQRgnIm9Ugv0Nc',r:4.7,k:9180,h:'Tous les jours 12h–20h',p:'',d:"Référence classique de Taipei, orgues et acoustique remarquée, sur le site du Liberty Square.",t:["Billets à l'avance","Accessible PMR"]},
   {id:'eslite-hall',n:'eslite performance hall',c:'classic',city:'tp',z:'Xinyi',lat:25.0445608,lon:121.5613507,pid:'ChIJdxiCX9SrQjQREfhwaBiw47g',r:4.5,k:1267,h:'Tous les jours 11h–22h',p:'',d:"Salle intimiste au sous-sol de la librairie eslite, idéale pour récitals, chœurs et petits concerts.",t:["Accessible PMR"]},
   {id:'tpac',n:'Taipei Performing Arts Center',c:'classic',city:'tp',z:'Shilin',lat:25.0851242,lon:121.5243691,pid:'ChIJ8fWvxLGuQjQRpnyrqt4UzQ8',r:4.1,k:5893,h:'Mar–dim 12h–21h',p:'',d:"Architecture avant-gardiste signée OMA, à côté du marché de nuit de Shilin. Intéressant à visiter même sans spectacle.",t:["Accessible PMR"]},
-  {id:'tmi',n:'Taiwan Music Institute',c:'classic',city:'tp',z:'Shilin',lat:25.1021668,lon:121.5201258,pid:'ChIJsQYzt3qpQjQRFHjzZnBQVpo',r:4.5,k:497,h:'Mar–dim 10h–12h et 13h–17h',p:'',d:"Centre dédié aux musiques traditionnelles taïwanaises, avec salles d'opéra chinois et de concert.",t:["Billets à l'avance"]}
+  {id:'tmi',n:'Taiwan Music Institute',c:'classic',city:'tp',z:'Shilin',lat:25.1021668,lon:121.5201258,pid:'ChIJsQYzt3qpQjQRFHjzZnBQVpo',r:4.5,k:497,h:'Mar–dim 10h–12h et 13h–17h',p:'',d:"Centre dédié aux musiques traditionnelles taïwanaises, avec salles d'opéra chinois et de concert.",t:["Billets à l'avance"]},
+  {"id": "live-warehouse", "n": "LIVE WAREHOUSE", "c": "live", "city": "kh", "z": "Yancheng · Pier-2", "lat": 22.618058, "lon": 120.285667, "pid": "ChIJ3xavC4gDbjQRCMLuTDuGz-U", "r": 4.8, "k": 1078, "h": "", "p": "", "d": "Principale salle de tournées de Kaohsiung, dans la zone d'art Pier-2. Concerts debout, son et lumières très appréciés.", "t": ["Concert debout", "Horaires selon l'événement"]},
+  {"id": "hi-ing", "n": "Hi-ing Music Hall", "c": "arena", "city": "kh", "z": "Yancheng · Love River", "lat": 22.6184233, "lon": 120.2891388, "pid": "ChIJEw4zZXsDbjQR87exy2mBc8U", "r": 4.8, "k": 1002, "h": "", "p": "", "d": "Salle de moyenne jauge du Kaohsiung Music Center, au bord de la Love River. La scène est bien visible de partout.", "t": ["Billets à l'avance"]},
+  {"id": "kmc", "n": "Kaohsiung Music Center", "c": "arena", "city": "kh", "z": "Yancheng · port", "lat": 22.6174, "lon": 120.2884, "pid": "ChIJcT4Bwn8DbjQR0Qx-xK5JEsY", "r": 4.7, "k": 6500, "h": "Mar–dim 10h–22h", "p": "", "d": "Complexe dédié à la pop, au bord du port, dont le bâtiment s'illumine la nuit. Les horaires sont ceux du site, pas des concerts.", "t": ["Fermé le lundi"]},
+  {"id": "rock-live", "n": "洛克 Rock Music Live House", "c": "bar", "city": "kh", "z": "Qianjin", "lat": 22.6308975, "lon": 120.2963897, "pid": "ChIJ7W4Aqx0FbjQRs5IxHUaUjsc", "r": 4.9, "k": 1724, "h": "Mer–dim 21h–3h", "p": "", "d": "Live house et bar rénové, avec éclairage de scène, groupes, chanteurs invités et cocktails à thème. Non-fumeur.", "t": ["Fermé lun–mar"]},
+  {"id": "madker", "n": "Madker Live House & Restaurant", "c": "bar", "city": "kh", "z": "Yancheng", "lat": 22.6235429, "lon": 120.2803886, "pid": "ChIJA6cbg3YEbjQRqLnDWwcSbf8", "r": 4.8, "k": 1531, "h": "Mer–dim 18h15–1h30", "p": "", "d": "Restaurant avec concerts live chaque soir, bonne sono. D'après les avis, l'entrée de 500 TWD est déductible des consommations.", "t": ["Fermé lun–mar"]},
+  {"id": "on-air", "n": "On Air 播放吧", "c": "bar", "city": "kh", "z": "Sanmin", "lat": 22.6460753, "lon": 120.2978254, "pid": "ChIJG8Rrg3YFbjQRpVwC0POsJJU", "r": 4.7, "k": 280, "h": "Mer–dim 19h–2h", "p": "", "d": "Restaurant-bar musical avec scène, éclairage soigné et cuisine tardive. Un des meilleurs lieux live de la ville selon les avis.", "t": ["Fermé lun–mar"]},
+  {"id": "shanzhai", "n": "山寨 音樂餐廳", "c": "bar", "city": "kh", "z": "Qianjin", "lat": 22.628486, "lon": 120.2971615, "pid": "ChIJzTS1pmIEbjQRRoSrYF43u-Y", "r": 4.7, "k": 266, "h": "Lun–mer, dim 20h–2h · ven–sam 20h–4h", "p": "", "d": "Restaurant musical avec groupe live, chansons anciennes et demandes du public. Ambiance nostalgique.", "t": ["Fermé le jeudi"]},
+  {"id": "old-fart", "n": "老屁股音樂屋 Old Fart D.J. Bar", "c": "bar", "city": "kh", "z": "Yancheng", "lat": 22.6249, "lon": 120.2817, "pid": "ChIJH9HiyHYEbjQR1bJ958hc7bg", "r": 4.9, "k": 239, "h": "Mar–dim 20h–1h30 · ven–sam jusqu'à 3h", "p": "", "d": "Petit bar à DJ et musique, tenu par un couple, grande carte de cocktails.", "t": ["Fermé le lundi"]},
+  {"id": "23-music-lab", "n": "23 Music Lab", "c": "bar", "city": "kh", "z": "Yancheng · Pier-2", "lat": 22.6188, "lon": 120.2855, "pid": "ChIJQ-kBl5MDbjQRCpy-nWixGeE", "r": 5.0, "k": 33, "h": "Mer–jeu 18h–1h · ven 18h–4h · sam 14h–4h · dim 14h–1h", "p": "", "d": "Petit lieu de musique et de DJ dans un entrepôt de Pier-2. Peu d'avis, mais une note parfaite.", "t": ["Fermé lun–mar", "Petite jauge"]},
+  {"id": "weiwuying", "n": "Weiwuying National Center for the Arts", "c": "classic", "city": "kh", "z": "Fengshan", "lat": 22.623, "lon": 120.3424, "pid": "ChIJ_WQhqLQEbjQRJiKjGxZYBPw", "r": 4.7, "k": 23729, "h": "Tous les jours 11h–20h", "p": "", "d": "L'un des plus grands centres d'arts du spectacle d'Asie : salle de concert, opéra et grand toit-parc. Visite et programmation toute l'année.", "t": ["Billets à l'avance"]},
+  {"id": "kh-music-hall", "n": "Kaohsiung City Music Hall", "c": "classic", "city": "kh", "z": "Yancheng · Love River", "lat": 22.6275, "lon": 120.2866, "pid": "ChIJ_QM9jnoEbjQRQvv8fQDIzX4", "r": 4.2, "k": 1334, "h": "Tous les jours 9h–17h", "p": "", "d": "Petite salle de récital au bord de la rivière, à l'acoustique appréciée.", "t": ["Récitals"]},
+  {"id": "legacy-tc", "n": "Legacy Taichung", "c": "live", "city": "tc", "z": "Xitun", "lat": 24.1766, "lon": 120.6232, "pid": "ChIJg3ll0gEWaTQRWkBvX9uTUV0", "r": 4.6, "k": 1771, "h": "Tous les jours 11h–23h", "p": "", "d": "Salle de concerts de petite et moyenne jauge, très bon son, un peu excentrée. Les horaires sont ceux du lieu, pas des concerts.", "t": ["Horaires selon l'événement"]},
+  {"id": "sound-tc", "n": "Taichung Sound Live House", "c": "live", "city": "tc", "z": "Central District", "lat": 24.1397, "lon": 120.6812, "pid": "ChIJWS5vpIo9aTQRnafVcmySfQM", "r": 4.6, "k": 481, "h": "Mer–dim à partir de 18h", "p": "", "d": "Salle de concerts à l'étage et bar décoré au rez-de-chaussée, ambiance rock et dive bar. Billet nécessaire pour les concerts.", "t": ["Fermé lun–mar", "Billet pour les concerts"]},
+  {"id": "words-live", "n": "Words Live 忠明館", "c": "live", "city": "tc", "z": "Nantun", "lat": 24.1332, "lon": 120.6572, "pid": "ChIJa6ocqv09aTQR_aq4F2OeGzc", "r": 4.9, "k": 610, "h": "Tous les jours 9h–18h", "p": "", "d": "Espace de spectacle et d'événements bien équipé. Ouvert en journée, la programmation dépend des réservations.", "t": ["Horaires selon l'événement"]},
+  {"id": "national-tc", "n": "National Taichung Theater", "c": "classic", "city": "tc", "z": "Xitun", "lat": 24.1626, "lon": 120.6403, "pid": "ChIJcaKjTOw9aTQR4mAeJzejtdg", "r": 4.6, "k": 50195, "h": "Mar–dim 11h30–21h", "p": "", "d": "Théâtre national à l'architecture célèbre, de formes courbes. Intéressant à visiter même sans spectacle.", "t": ["Fermé le lundi", "Billets à l'avance"]},
+  {"id": "simba", "n": "Simba Music Restaurant", "c": "bar", "city": "tc", "z": "West District", "lat": 24.1468, "lon": 120.6675, "pid": "ChIJaRYrc3U9aTQR_jKCSC2kUZ8", "r": 4.3, "k": 985, "h": "Mer–dim 21h–4h", "p": "", "d": "Club à groupes live. Les avis signalent beaucoup de reprises demandées par le public et de la fumée à l'intérieur.", "t": ["Fermé lun–mar"]},
+  {"id": "gong-high", "n": "公海 Gong High", "c": "bar", "city": "tc", "z": "West District", "lat": 24.1469, "lon": 120.6584, "pid": "ChIJUS3InZg9aTQRoG2oymnB2Nk", "r": 4.5, "k": 639, "h": "21h–4h · ven–sam dès 20h", "p": "", "d": "Bar animé où l'on vient pour un verre et où l'on reste la soirée. Serveuses anglophones.", "t": ["Personnel anglophone"]},
+  {"id": "galaxy", "n": "GALAXY Music Bar", "c": "bar", "city": "tc", "z": "Xitun", "lat": 24.1765831, "lon": 120.6220685, "pid": "ChIJY3AwC9QXaTQRZCEEZHnDys0", "r": 4.9, "k": 1966, "h": "Lun–sam 21h–4h", "p": "", "d": "Grand lounge avec groupe live et chanteurs. D'après les avis, le minimum de consommation tourne autour de 700 TWD par personne.", "t": ["Fermé le dimanche", "Minimum de consommation"]},
+  {"id": "amuce", "n": "AmucePlus 主題展演酒吧", "c": "bar", "city": "tc", "z": "Central District", "lat": 24.1397013, "lon": 120.6803712, "pid": "ChIJ5WhlAhM9aTQRhyHk8mHvTzA", "r": 4.4, "k": 291, "h": "Mer–dim 21h–4h", "p": "", "d": "Bar à groupes live : le groupe joue après 23h. Les avis signalent un minimum de dépense élevé pour les canapés.", "t": ["Fermé lun–mar", "Minimum de consommation"]},
+  {"id": "button-bar", "n": "Button Bar Music Restaurant", "c": "bar", "city": "tc", "z": "North District", "lat": 24.1540916, "lon": 120.6698376, "pid": "ChIJu4flbnc9aTQRMVuUMjri800", "r": 4.5, "k": 416, "h": "Mar–dim 19h–1h", "p": "", "d": "Bar de chant live et de karaoké, parmi les plus cités de Taichung. Les avis évoquent un minimum d'environ 550 TWD par personne.", "t": ["Fermé le lundi", "Minimum de consommation"]},
+  {"id": "tcrc", "n": "TCRC Live House", "c": "live", "city": "tn", "z": "West Central · Ximen", "lat": 22.9970378, "lon": 120.2004637, "pid": "ChIJY9qQW2F2bjQRySw5YVSoMtc", "r": 4.4, "k": 304, "h": "Ven 19h–23h30 · sam–dim 20h–23h30", "p": "", "d": "Petit lieu indie dans une ruelle ornée de fresques : groupes locaux, DJ, cocktails et whiskies. Personnel anglophone.", "t": ["Week-end seulement", "Pas de réservation"]},
+  {"id": "signal-tn", "n": "訊號音樂 Signal Livehouse", "c": "live", "city": "tn", "z": "West Central", "lat": 22.9940939, "lon": 120.1948856, "pid": "ChIJhbLW1uJ3bjQR5iLcofA7oI4", "r": 5.0, "k": 1, "h": "Tous les jours 19h–23h", "p": "", "d": "Live house en sous-sol. Un seul avis pour l'instant : à vérifier avant de s'y rendre.", "t": ["Un seul avis"]},
+  {"id": "pioneer", "n": "Pioneer Restaurant", "c": "bar", "city": "tn", "z": "South District", "lat": 22.9817607, "lon": 120.1878202, "pid": "ChIJv-JTNd91bjQRPEQiZQFFvYs", "r": 4.5, "k": 2012, "h": "18h–1h · ven–sam jusqu'à 2h", "p": "", "d": "Pub-restaurant à l'ancienne avec groupe live tous les soirs, reprises rock et pop en anglais et en mandarin. Grande portions.", "t": ["Groupe live chaque soir"]},
+  {"id": "midtown", "n": "Midtown Tainan Coffee Bar & Live House", "c": "bar", "city": "tn", "z": "West Central", "lat": 23.0015506, "lon": 120.1942054, "pid": "ChIJrRdtjQJ3bjQR2h7HhDxQlL0", "r": 4.5, "k": 149, "h": "Lun–ven 18h–3h · sam–dim 15h–3h", "p": "", "d": "Bar à cocktails avec scène et bonne sono. Un avis signale un concert interrompu à minuit pour plainte de bruit.", "t": ["Concerts tard le soir"]},
+  {"id": "j-house", "n": "宅·J House Coffee Bar & Jazz", "c": "bar", "city": "tn", "z": "West Central · Ximen", "lat": 22.9911178, "lon": 120.1975553, "pid": "ChIJJ8CgDox3bjQRJyv0cL8iET4", "r": 4.9, "k": 544, "h": "Tous les jours 19h–2h", "p": "", "d": "Bar jazz de style speakeasy, caché à l'étage. Un avis mentionne un minimum de 500 TWD par personne le week-end.", "t": ["Minimum le week-end"]},
+  {"id": "tn-cultural-center", "n": "Tainan Cultural Center", "c": "classic", "city": "tn", "z": "East District", "lat": 22.9747562, "lon": 120.2215652, "pid": "ChIJYUOPRyd0bjQRivbrqFsMKuU", "r": 4.4, "k": 7208, "h": "Mer–dim 9h–17h", "p": "", "d": "Centre culturel avec salles de spectacle, entouré d'un parc avec étang. Concerts symphoniques et arts de la scène.", "t": ["Fermé lun–mar"]}
   ];
 
   var CATS={arena:{label:'Grandes salles'},classic:{label:'Classique et culture'},live:{label:'Live houses'},bar:{label:'Bars live et petites salles'}};
@@ -207,20 +246,24 @@ var V=[
   var WK={
     'taipei-arena':'Taipei Arena','taipei-music-center':'Taipei Music Center','legacy-tera':'Taipei Music Center','live-house-d':'Taipei Music Center',
     'zepp-new-taipei':'Zepp New Taipei','legacy-taipei':'Huashan 1914 Creative Park','red-house':'Red House Theater Taipei','national-concert-hall':'National Concert Hall Taipei',
-    'tpac':'Taipei Performing Arts Center','tmi':'Taiwan Music Institute','eslite-hall':'Eslite Spectrum Xinyi'
+    'tpac':'Taipei Performing Arts Center','tmi':'Taiwan Music Institute','eslite-hall':'Eslite Spectrum Xinyi','national-tc':'National Taichung Theater','weiwuying':'National Kaohsiung Center for the Arts','kmc':'Kaohsiung Music Center','hi-ing':'Kaohsiung Music Center','kh-music-hall':'Kaohsiung City Music Hall','tn-cultural-center':'Tainan Cultural Center'
   };
   var ZONES=[
-    {k:"Vue d'ensemble",lat:25.06,lon:121.51,z:11},{k:'Ximen',lat:25.0435,lon:121.5055,z:17},{k:'Gongguan',lat:25.0150,lon:121.5330,z:15},
+    {k:'Toute l\'île',lat:23.7,lon:120.9,z:8},{k:'Taipei',lat:25.06,lon:121.51,z:11},{k:'Ximen',lat:25.0435,lon:121.5055,z:17},{k:'Gongguan',lat:25.0150,lon:121.5330,z:15},
     {k:"Da'an · Songshan",lat:25.0400,lon:121.5490,z:14},{k:'Nangang',lat:25.0521,lon:121.5990,z:17},{k:'Shilin · Zhongshan',lat:25.0780,lon:121.5230,z:14},
-    {k:'Sanchong',lat:25.0735,lon:121.4920,z:14},{k:'Banqiao · Xinzhuang',lat:25.0350,lon:121.4420,z:13},{k:'Zhonghe · Yonghe',lat:25.0030,lon:121.5050,z:14},{k:'Tamsui',lat:25.1710,lon:121.4400,z:15}
+    {k:'Sanchong',lat:25.0735,lon:121.4920,z:14},{k:'Banqiao · Xinzhuang',lat:25.0350,lon:121.4420,z:13},{k:'Zhonghe · Yonghe',lat:25.0030,lon:121.5050,z:14},{k:'Tamsui',lat:25.1710,lon:121.4400,z:15},
+    {k:'Kaohsiung',lat:22.632,lon:120.30,z:12},{k:'Kaohsiung · Pier-2',lat:22.6185,lon:120.2865,z:16},{k:'Taichung',lat:24.15,lon:120.66,z:12},{k:'Tainan',lat:22.995,lon:120.20,z:13}
   ];
 
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
   function fmt(n){try{return n.toLocaleString('fr-FR');}catch(e){return String(n);}}
-  function icoPath(c,hw){
-    return {arena:'<circle r="9"/>',classic:'<path d="M0 -10.5L10 0L0 10.5L-10 0Z"/>',live:'<path d="M0 -10.5L10.5 8L-10.5 8Z"/>',bar:'<rect x="-7" y="-7" width="14" height="14" rx="3"/>'}[c];
-  }
-  function ico(c,size){return '<svg class="ico" width="'+size+'" height="'+size+'" viewBox="-12 -12 24 24" aria-hidden="true" style="--c:var(--c-'+c+')">'+icoPath(c)+'</svg>';}
+  var GL={
+    arena:'<g transform="translate(12 12) scale(.9) translate(-12 -12.6)"><g class="gl"><ellipse cx="5.5" cy="6.2" rx="2.9" ry=".8"/><ellipse cx="18.5" cy="6.2" rx="2.9" ry=".8"/><rect x="7.2" y="7.8" width="4.2" height="3.1" rx=".9"/><rect x="12.6" y="7.8" width="4.2" height="3.1" rx=".9"/><circle cx="12" cy="15.7" r="4.5"/></g><g class="gs"><path d="M5.5 7V18M18.5 7V18"/></g><circle class="hole" cx="12" cy="15.7" r="2"/></g>',
+    live:'<g transform="translate(12 12) scale(.88) rotate(40) translate(-12 -10.8)"><g class="gl"><circle cx="12" cy="16" r="3.6"/><circle cx="12" cy="11.5" r="2.5"/><rect x="11.2" y="3.6" width="1.6" height="8"/><rect x="10.6" y="1.9" width="2.8" height="2.7" rx=".6"/></g><circle class="hole" cx="12" cy="14.3" r="1.2"/></g>',
+    bar:'<g transform="translate(12 12) scale(.92) translate(-11.9 -10.8)"><g class="gl"><path d="M4.5 4.2H12.5C12.5 8.4 10.8 10.4 8.5 10.4C6.2 10.4 4.5 8.4 4.5 4.2Z"/><rect x="8" y="10" width="1" height="6.2"/><rect x="5.6" y="16" width="5.8" height="1.3" rx=".65"/><rect x="14.4" y="4.2" width="3.8" height="6.4" rx="1.9"/></g><g class="gs"><path d="M13.3 9.4V10.2A3 3 0 0 0 19.3 10.2V9.4"/><path d="M16.3 13.2V16.2M14.5 16.4H18.1"/></g></g>',
+    classic:'<g transform="translate(12 12) scale(.88) rotate(-32) translate(-12 -10.9)"><g class="gl"><circle cx="12" cy="3.1" r="1.4"/><rect x="11.3" y="3.8" width="1.4" height="6.4"/><path d="M12 9.6C9.6 9.6 8.4 10.9 8.6 12.4C8.8 13.4 9.6 13.7 9.6 14.4C9.6 15.1 8.6 15.4 8.4 16.7C8.2 18.5 9.8 20 12 20C14.2 20 15.8 18.5 15.6 16.7C15.4 15.4 14.4 15.1 14.4 14.4C14.4 13.7 15.2 13.4 15.4 12.4C15.6 10.9 14.4 9.6 12 9.6Z"/></g><path d="M10.3 13.6V16M13.7 13.6V16" fill="none" stroke="var(--c)" stroke-width=".9" stroke-linecap="round"/></g>'
+  };
+  function ico(c,size){return '<svg class="ico" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" aria-hidden="true" style="--c:var(--c-'+c+')"><circle class="bg" cx="12" cy="12" r="11.2"/>'+GL[c]+'</svg>';}
 
   /* thème */
   var root=document.documentElement,themeBtn=document.getElementById('theme');
@@ -233,25 +276,57 @@ var V=[
   /* carte */
   var map=L.map('map',{zoomControl:true,preferCanvas:false}).setView([25.06,121.51],11);
   var TILE_ATTR='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/attributions">CARTO</a>';
-  var tile=null,prov=0,okTiles=0,badTiles=0;
-  /* Fonds de carte testés dans l'ordre : si un serveur refuse les tuiles, on passe au suivant. */
+  var tile=null,gl=null,prov=0,okTiles=0,badTiles=0,rasterOnly=false;
+  var lang='fr';
+  try{lang=localStorage.getItem('tst-lang')||'fr';}catch(e){}
+  var LANGX={
+    fr:['coalesce',['get','name:fr'],['get','name:en'],['get','name_en'],['get','name:latin'],['get','name']],
+    en:['coalesce',['get','name:en'],['get','name_en'],['get','name:latin'],['get','name']],
+    zh:['coalesce',['get','name:zh'],['get','name']]
+  };
   var PROVIDERS=[
     function(l){return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',referrerPolicy:'origin'});},
     function(l){return L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',{subdomains:'abc',maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> France',referrerPolicy:'origin'});}
   ];
-
-  function setTiles(){
-    if(tile)map.removeLayer(tile);
-    okTiles=0;badTiles=0;
+  function clearBase(){
+    if(tile){map.removeLayer(tile);tile=null;}
+    if(gl){try{map.removeLayer(gl);}catch(e){}gl=null;}
+  }
+  function applyLang(){
+    if(!gl)return;
+    try{
+      var mg=gl.getMaplibreMap(),st=mg.getStyle();
+      if(!st||!st.layers)return;
+      st.layers.forEach(function(l){
+        if(l.type==='symbol'&&l.layout&&l.layout['text-field']){mg.setLayoutProperty(l.id,'text-field',LANGX[lang]);}
+      });
+    }catch(e){}
+  }
+  function raster(){
+    clearBase();okTiles=0;badTiles=0;
     tile=PROVIDERS[prov](isLight());
     tile.on('tileload',function(){okTiles++;});
-    tile.on('tileerror',function(){
-      badTiles++;
-      if(okTiles===0&&badTiles>=3&&prov<PROVIDERS.length-1){prov++;setTiles();}
-    });
+    tile.on('tileerror',function(){badTiles++;if(okTiles===0&&badTiles>=3&&prov<PROVIDERS.length-1){prov++;raster();}});
     tile.addTo(map);
-    document.getElementById('map').classList.toggle('darkmap',!isLight());
+  }
+  function setTiles(){
     themeBtn.textContent=isLight()?'Mode sombre':'Mode clair';
+    document.getElementById('map').classList.toggle('darkmap',!isLight());
+    var canGL=!rasterOnly&&window.maplibregl&&L.maplibreGL;
+    if(!canGL){raster();return;}
+    clearBase();
+    try{
+      var loaded=false;
+      gl=L.maplibreGL({
+        style:'https://tiles.openfreemap.org/styles/'+(isLight()?'liberty':'positron'),
+        attribution:'© <a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/">OpenMapTiles</a> Données © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+      var mg=gl.getMaplibreMap();
+      mg.on('style.load',function(){loaded=true;applyLang();});
+      mg.on('styledata',function(){if(loaded)applyLang();});
+      var me=gl;
+      setTimeout(function(){if(!loaded&&gl===me){rasterOnly=true;raster();}},9000);
+    }catch(e){rasterOnly=true;raster();}
   }
   themeBtn.addEventListener('click',function(){
     var t=isLight()?'dark':'light';root.setAttribute('data-theme',t);
@@ -264,7 +339,7 @@ var V=[
   var state={city:'all',cats:{arena:true,classic:true,live:true,bar:true},sel:null};
   var M={};
   V.forEach(function(v){
-    var icon=L.divIcon({className:'pinicon',html:ico(v.c,26),iconSize:[26,26],iconAnchor:[13,13]});
+    var icon=L.divIcon({className:'pinicon',html:ico(v.c,32),iconSize:[32,32],iconAnchor:[16,16]});
     var m=L.marker([v.lat,v.lon],{icon:icon,title:v.n,keyboard:true,riseOnHover:true});
     m.bindTooltip(v.n,{direction:'top',offset:[0,-12]});
     m.on('click',function(){select(v.id,true);});
@@ -332,11 +407,11 @@ var V=[
     var tags=v.t.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join('');
     var url='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(v.n)+'&query_place_id='+encodeURIComponent(v.pid);
     detailEl.innerHTML=
-      '<div class="photo" id="photo"><div class="ph" style="--c:var(--c-'+v.c+')">'+ico(v.c,34)+'<span>Aucune photo</span></div></div>'+
+      '<div class="photo" id="photo"><div class="ph" style="--c:var(--c-'+v.c+')">'+ico(v.c,44)+'<span>Aucune photo</span></div></div>'+
       '<div class="body">'+
-      '<div class="pill">'+ico(v.c,16)+'<span>'+esc(CATS[v.c].label)+'</span></div>'+
+      '<div class="pill">'+ico(v.c,24)+'<span>'+esc(CATS[v.c].label)+'</span></div>'+
       '<h2>'+esc(v.n)+'</h2>'+
-      '<p class="where">'+esc(v.z)+' · '+(v.city==='tp'?'Taipei':'Nouveau Taipei')+'</p>'+
+      '<p class="where">'+esc(v.z)+' · '+({tp:'Taipei',nt:'New Taipei',kh:'Kaohsiung',tc:'Taichung',tn:'Tainan'}[v.city]||'')+'</p>'+
       '<p class="desc">'+esc(v.d)+'</p>'+
       '<dl>'+rows+'</dl><div class="tags">'+tags+'</div>'+
       '<div class="actions"><a class="btn" href="'+url+'" target="_blank" rel="noopener">Itinéraire Google Maps</a>'+
@@ -366,7 +441,7 @@ var V=[
     function alert_(msg){var h=detailEl.querySelector('.hint');if(h)h.textContent=msg;}
     document.getElementById('addph').addEventListener('click',function(){file.click();});
     file.addEventListener('change',function(){add(file.files[0]);file.value='';});
-    rm.addEventListener('click',function(){dbDel(v.id).then(function(){document.getElementById('photo').innerHTML='<div class="ph" style="--c:var(--c-'+v.c+')">'+ico(v.c,34)+'<span>Aucune photo</span></div>';paint();});});
+    rm.addEventListener('click',function(){dbDel(v.id).then(function(){document.getElementById('photo').innerHTML='<div class="ph" style="--c:var(--c-'+v.c+')">'+ico(v.c,44)+'<span>Aucune photo</span></div>';paint();});});
     ph.addEventListener('dragover',function(e){e.preventDefault();detailEl.classList.add('drop');});
     ph.addEventListener('dragleave',function(){detailEl.classList.remove('drop');});
     ph.addEventListener('drop',function(e){e.preventDefault();detailEl.classList.remove('drop');var f=e.dataTransfer&&e.dataTransfer.files[0];add(f);});
@@ -389,9 +464,9 @@ var V=[
     ORDER.forEach(function(c){
       var items=V.filter(function(v){return v.c===c&&isVis(v);});
       if(!items.length)return;n+=items.length;
-      html+='<div class="gh">'+ico(c,14)+'<span>'+esc(CATS[c].label)+' · '+items.length+'</span></div>';
+      html+='<div class="gh">'+ico(c,20)+'<span>'+esc(CATS[c].label)+' · '+items.length+'</span></div>';
       items.forEach(function(v){
-        html+='<button type="button" class="row" data-id="'+v.id+'" style="--c:var(--c-'+v.c+')" aria-current="'+(state.sel===v.id?'true':'false')+'">'+ico(v.c,16)+
+        html+='<button type="button" class="row" data-id="'+v.id+'" style="--c:var(--c-'+v.c+')" aria-current="'+(state.sel===v.id?'true':'false')+'">'+ico(v.c,22)+
           '<span><span class="nm">'+esc(v.n)+'</span><span class="zn2">'+esc(v.z)+'</span></span><span class="rt">★ '+v.r.toFixed(1)+'</span></button>';
       });
     });
@@ -402,7 +477,7 @@ var V=[
   var chipsEl=document.getElementById('chips'),chipBtns={};
   ORDER.forEach(function(c){
     var b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed','true');b.style.setProperty('--c','var(--c-'+c+')');
-    b.innerHTML=ico(c,16)+'<span>'+esc(CATS[c].label)+'</span><span class="n"></span>';
+    b.innerHTML=ico(c,24)+'<span>'+esc(CATS[c].label)+'</span><span class="n"></span>';
     b.addEventListener('click',function(){
       var active=ORDER.filter(function(k){return state.cats[k];});
       if(state.cats[c]&&active.length===1)return;
@@ -432,6 +507,15 @@ var V=[
   var zb=document.getElementById('zonebar');
   ZONES.forEach(function(z){var b=document.createElement('button');b.type='button';b.textContent=z.k;b.addEventListener('click',function(){map.flyTo([z.lat,z.lon],z.z,{duration:.7});});zb.appendChild(b);});
 
+  document.querySelectorAll('#lang button').forEach(function(b){
+    b.setAttribute('aria-pressed',b.getAttribute('data-lang')===lang?'true':'false');
+    b.addEventListener('click',function(){
+      lang=b.getAttribute('data-lang');
+      try{localStorage.setItem('tst-lang',lang);}catch(e){}
+      document.querySelectorAll('#lang button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+      applyLang();
+    });
+  });
   openDB().then(function(){refilter();select('taipei-arena',false);});
 })();
 </script>
